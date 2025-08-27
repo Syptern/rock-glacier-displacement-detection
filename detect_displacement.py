@@ -1,13 +1,15 @@
+import argparse
 import rasterio
 import numpy as np
 from skimage.feature import match_template
 import geopandas as gpd
 from shapely.geometry import Point, LineString
 import math
-
+import os
+    
 from directional_clustering import cluster_displacement_points
 
-def local_displacement_points_and_lines(img1, img2, transform, crs, window=16, search=32):
+def local_displacement_points_and_lines(img1, img2, transform, crs, window, search):
     h, w = img1.shape
     point_records = []
     line_records = []
@@ -83,10 +85,20 @@ def local_displacement_points_and_lines(img1, img2, transform, crs, window=16, s
 
 
 if __name__ == "__main__":
-    raster1 = "before.tif"
-    raster2 = "after.tif"
-    out_points = "displacement_points.geojson"
-    out_lines = "displacement_lines.geojson"
+    parser = argparse.ArgumentParser(description="Detect rock glacier displacements from two rasters.")
+    parser.add_argument("before", help="Path to the first raster (before).")
+    parser.add_argument("after", help="Path to the second raster (after).")
+    parser.add_argument("--window_size", type=int, default=16, help="Template (window) size for displacement search.")
+    parser.add_argument("--search_size", type=int, default=32, help="Search window size.")
+    parser.add_argument("--min_cluster_size", type=int, default=5, help="Minimum number of points per cluster.")
+    parser.add_argument("--std_threshold", type=float, default=0.05, help="Maximum circular variance for angles.")
+    parser.add_argument("--disp_threshold", type=float, default=1, help="Minimum displacement magnitude to consider.")
+    parser.add_argument("--length_tol_rel", type=float, default=0.2, help="Relative tolerance for length differences.")
+    parser.add_argument("--outdir", type=str, default="results", help="Output directory.")
+    args = parser.parse_args()
+    
+    raster1 = args.before
+    raster2 = args.after
 
     with rasterio.open(raster1) as src1, rasterio.open(raster2) as src2:
         img1 = src1.read(1).astype(np.float32)
@@ -95,16 +107,26 @@ if __name__ == "__main__":
         crs = src1.crs
 
     points_gdf, lines_gdf = local_displacement_points_and_lines(
-        img1, img2, transform, crs, window=16, search=32
+        img1, img2, transform, crs, window=args.window_size, search=args.search_size
     )
 
     points_clustered, lines_clustered = cluster_displacement_points(
         points_gdf,
-        window_size=16,
-        min_cluster_size=15,
-        std_threshold=0.05,
-        disp_threshold=0.8
+        window_size=args.window_size,
+        min_cluster_size=args.min_cluster_size,
+        std_threshold=args.std_threshold,
+        disp_threshold=args.disp_threshold,
+        length_tol_rel=args.length_tol_rel
     )
+    
+    outdir = args.outdir
+    os.makedirs(outdir, exist_ok=True)
+        
+    out_points = os.path.join(outdir, "displacement_points.geojson")
+    out_lines = os.path.join(outdir, "displacement_lines.geojson")
+    
+    out_clustered_points = os.path.join(outdir, "clustered_displacement_points.geojson")
+    out_clustered_lines = os.path.join(outdir,"clustered_displacement_lines.geojson")
     
     points_gdf.to_file(out_points, driver="GeoJSON")
     lines_gdf.to_file(out_lines, driver="GeoJSON")
@@ -113,8 +135,8 @@ if __name__ == "__main__":
     print(f"✅ Displacement lines written to {out_lines}")
     
     
-    points_clustered.to_file("clustered_points.geojson", driver="GeoJSON")
-    lines_clustered.to_file("clustered_lines.geojson", driver="GeoJSON")
+    points_clustered.to_file(out_clustered_points, driver="GeoJSON")
+    lines_clustered.to_file(out_clustered_lines, driver="GeoJSON")
     
     print(f"✅ Displacement clustered points written to {out_points}")
     print(f"✅ Displacement clustered lines written to {out_lines}")
