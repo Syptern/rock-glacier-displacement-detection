@@ -55,8 +55,8 @@ python detect_displacement.py before.tif after.tif --window_size 16 --search_siz
 
 ### Displacement map
 
-![example displacement vectors output](images\example_displacement_output.png)
+![example displacement vectors output](images/example_displacement_output.png)
 
 ### Selected clusters
 
-![example clusters output](images\example_displacement_clusters_output.png)
+![example clusters output](images/example_displacement_clusters_output.png)
