@@ -48,3 +48,15 @@ python detect_displacement.py before.tif after.tif --window_size 16 --search_siz
 | `--length_tol_rel` | float | `0.2` | **Local** relative length tolerance vs. neighbor (e.g., `0.2` = ±20%). |
 | `--max_length_std` | float | `1.0` | Post-filter: maximum allowed **std** of lengths within a cluster. |
 | `--outdir` | path | `results/` | Output directory for GeoJSONs. |
+
+---
+
+## Output examples
+
+### Displacement map
+
+![example displacement vectors output](images\example_displacement_output.png)
+
+### Selected clusters
+
+![example clusters output](images\example_displacement_clusters_output.png)
