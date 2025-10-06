@@ -40,7 +40,7 @@ python detect_displacement.py before.tif after.tif --window_size 16 --search_siz
 | --- | --- | --- | --- |
 | `before` | path | —   | Path to the first (earlier) raster. |
 | `after` | path | —   | Path to the second (later) raster. |
-| `--gridw_size` | int | `12` | Template (block) size in pixels for matching. |
+| `--grid_size` | int | `12` | Template (block) size in pixels for matching. |
 | `--window_size` | int | `16` | Template (block) size in pixels for matching. |
 | `--search_size` | int | `32` | Half-size (radius) of search window in pixels around each template. |
 | `--min_cluster_size` | int | `5` | Minimum number of points to keep a cluster. |
