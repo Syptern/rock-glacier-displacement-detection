@@ -9,17 +9,16 @@ import os
     
 from directional_clustering import cluster_displacement_points
 
-def local_displacement_points_and_lines(img1, img2, transform, crs, window, search):
+def local_displacement_points_and_lines(img1, img2, transform, crs, window, search, grid_size):
     h, w = img1.shape
     point_records = []
     line_records = []
 
-    # pixel size in map units
     px_x = transform.a
-    px_y = -transform.e  # usually negative in north-up rasters
+    px_y = -transform.e  
 
-    for y in range(0, h - window, window):
-        for x in range(0, w - window, window):
+    for y in range(0, h - window, grid_size):
+        for x in range(0, w - window, grid_size):
             patch1 = img1[y:y+window, x:x+window]
 
             # define search area
@@ -95,6 +94,7 @@ if __name__ == "__main__":
     parser.add_argument("--disp_threshold", type=float, default=1, help="Minimum displacement magnitude to consider.")
     parser.add_argument("--length_tol_rel", type=float, default=0.2, help="Relative tolerance for length differences.")
     parser.add_argument("--outdir", type=str, default="results", help="Output directory.")
+    parser.add_argument("--grid_size", type=int, default=16, help="Grid size of displacement vectors")
     args = parser.parse_args()
     
     raster1 = args.before
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         crs = src1.crs
 
     points_gdf, lines_gdf = local_displacement_points_and_lines(
-        img1, img2, transform, crs, window=args.window_size, search=args.search_size
+        img1, img2, transform, crs, window=args.window_size, search=args.search_size, grid_size=args.grid_size
     )
 
     points_clustered, lines_clustered = cluster_displacement_points(
