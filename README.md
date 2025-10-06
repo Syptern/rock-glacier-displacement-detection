@@ -19,8 +19,8 @@ Inspired by **SAGA IMCORR** with added detection of similar movement clusters.
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/yourusername/rock-glacier-displacement.git
-cd rock-glacier-displacement
+git clone https://github.com/Syptern/rock-glacier-displacement-detection
+cd rock-glacier-displacement-detection
 pip install -r requirements.txt
 ```
 
